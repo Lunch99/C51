@@ -1,0 +1,146 @@
+C51 COMPILER V9.00   MAIN                                                                  07/19/2013 13:42:29 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <reg51.h>       //包含头文件
+   2          #include <stdlib.h>
+   3          sbit P1_0 = P1^0;
+   4          sbit P1_1 = P1^1;
+   5          unsigned int systemTime;
+   6          unsigned char k1 = 0;
+   7          void time0(void) interrupt 1 using 1
+   8          {
+   9   1              TH0 = 0x00;
+  10   1              TL0 = 0xff;
+  11   1      
+  12   1              systemTime++; 
+  13   1              if (systemTime > 32767)
+  14   1                      systemTime = 0;
+  15   1      }
+  16          
+  17          void inter0() interrupt 0{
+  18   1      k1 = 1;
+  19   1      P1_1 = 1;
+  20   1      }
+  21          //毫秒级延时函数
+  22          void delay(unsigned int x)
+  23          {
+  24   1        unsigned char i;
+  25   1       while(x--)
+  26   1       {
+  27   2         for(i = 0;i < 255;i++);
+  28   2       }
+  29   1      }
+  30          //字符发送函数
+  31          void putchar(unsigned char data1)  
+  32          {
+  33   1        SBUF = data1;               //将待发送的字符送入发送缓冲器
+  34   1       while(TI == 0);            //等待发送完成
+  35   1       TI = 0;                     //发送中断标志请0
+  36   1      }
+  37          //字符串发送函数
+  38          void putstring(unsigned char *dat)
+  39          {
+  40   1        while(*dat != '\0')           //判断字符串是否发送完毕
+  41   1       {
+  42   2         putchar(*dat);        //发送单个字符
+  43   2        dat++;                 //字符地址加1，指向先下一个字符
+  44   2        delay(5);
+  45   2       }
+  46   1      }
+  47          
+  48          //主函数
+  49          void main(void)
+  50          {
+  51   1              unsigned char k;
+  52   1              unsigned int i;
+  53   1              unsigned int j;
+  54   1              unsigned char x;
+  55   1              unsigned int ran_num;
+C51 COMPILER V9.00   MAIN                                                                  07/19/2013 13:42:29 PAGE 2   
+
+  56   1              unsigned int ran2;
+  57   1              unsigned char ran3;
+  58   1              P0 = 0x00;
+  59   1              P1 = 0x00;
+  60   1              P2 = 0x00;
+  61   1               SCON = 0x50;         //串口工作方式设置
+  62   1               TMOD = 0x20;         //定时器工作方式设置
+  63   1               PCON = 0x00;        //波特率倍增设置
+  64   1               TL1 = 0xfd;         //波特率设置
+  65   1               TH1 = 0xfd;        //
+  66   1               TI = 0;           // 清0发送中断标志         
+  67   1               TR1 = 1;          //开启定时器
+  68   1              
+  69   1                TH0 = 0x00;
+  70   1               TL0 = 0xff;
+  71   1               TR0 = 1;
+  72   1               ET0 = 1;
+  73   1               EA = 1;
+  74   1               EX0 = 1;
+  75   1               IT0 = 1;
+  76   1               while(1){
+  77   2               while(k1){
+  78   3                       j = systemTime % 255;
+  79   3                       srand(j);
+  80   3                               for (x=0;x<10;x++){
+  81   4                                  ran_num = rand()%15;
+  82   4                                      putstring("Start:");
+  83   4                                      putchar(65+ran_num);
+  84   4                                      //printf("StartTo: %d\n",ran_num);
+  85   4                                      for (i = 0; i < ran_num * 10; i = i + 10){
+  86   5                                              for (k = 0; k < i; k ++){
+  87   6                                                      P1_0 = !P1_0;
+  88   6                                                      delay(1500 / i);
+  89   6                                              }
+  90   5                                      }
+  91   4                                      ran2 = rand()%255;
+  92   4                                      putstring("\nGoAhead:");
+  93   4                                      putchar(ran2);
+  94   4                                      //printf("GoAhead: %d\n",ran_num);
+  95   4                                      for (i = 0; i < ran2 ;i++){
+  96   5                                              P1_0 = !P1_0;
+  97   5                                                      delay(150 / ran2);
+  98   5                                      }
+  99   4                                      //printf("SlowDown..\n");
+ 100   4                                      putstring("SlowDowe:\n");
+ 101   4                                      for (i = ran_num*10; i > 0;i = i-10){
+ 102   5                                              for (k = 0; k < i; k ++){
+ 103   6                                                      P1_0 = !P1_0;
+ 104   6                                                      delay(500 / i);
+ 105   6                                              }
+ 106   5                                       }
+ 107   4      
+ 108   4                                       ran3 = rand()%255;
+ 109   4                                       //printf("stop! %d\n",ran3);
+ 110   4                                       putstring("Stop:");
+ 111   4                                       putchar(ran3);
+ 112   4                                       P1_0 = 0;
+ 113   4                                       delay(ran3*10);
+ 114   4                                       putstring("\n");
+ 115   4      
+ 116   4                              }
+ 117   3                      }
+C51 COMPILER V9.00   MAIN                                                                  07/19/2013 13:42:29 PAGE 3   
+
+ 118   2              }
+ 119   1      }         
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    480    ----
+   CONSTANT SIZE    =     36    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3      10
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
